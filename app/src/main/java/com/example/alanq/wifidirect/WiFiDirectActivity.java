@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 public class WiFiDirectActivity extends Activity implements WifiP2pManager.ChannelListener, DeviceListFragment.DeviceActionListener {
 
+    // HIIIIIIIIIIIIIIi
     public static final String TAG = "wifidirectdemo";
     private WifiP2pManager manager;
     private boolean isWifiP2pEnabled = false;
