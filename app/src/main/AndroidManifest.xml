@@ -33,5 +33,9 @@
         <!-- Used for transferring files  after a successful connection -->
         <service android:enabled="true" android:name=".FileTransferService" />
 
+        <activity
+            android:name="com.spotify.sdk.android.authentication.LoginActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
     </application>
 </manifest>

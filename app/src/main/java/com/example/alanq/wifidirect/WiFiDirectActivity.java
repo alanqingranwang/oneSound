@@ -117,6 +117,12 @@ public class WiFiDirectActivity extends Activity implements WifiP2pManager.Chann
     }
 
     @Override
+    protected void onDestroy() {
+        Spotify.destroyPlayer(this);
+        super.onDestroy();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -345,6 +351,7 @@ public class WiFiDirectActivity extends Activity implements WifiP2pManager.Chann
 
     @Override
     public void onPlaybackError(Error error) {
-
+        Toast.makeText(WiFiDirectActivity.this, "Error: " + error.name(),
+                Toast.LENGTH_SHORT).show();
     }
 }
