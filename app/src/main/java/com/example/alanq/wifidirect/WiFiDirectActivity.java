@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -29,6 +28,7 @@ import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import static com.spotify.sdk.android.authentication.LoginActivity.REQUEST_CODE;
+
 
 public class WiFiDirectActivity extends Activity implements WifiP2pManager.ChannelListener, DeviceListFragment.DeviceActionListener, SpotifyPlayer.NotificationCallback, ConnectionStateCallback {
 
