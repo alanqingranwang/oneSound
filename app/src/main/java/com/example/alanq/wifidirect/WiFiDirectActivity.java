@@ -9,18 +9,29 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationRequest;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.spotify.sdk.android.player.Config;
+import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.PlayerEvent;
+import com.spotify.sdk.android.player.Spotify;
+import com.spotify.sdk.android.player.SpotifyPlayer;
 
-public class WiFiDirectActivity extends Activity implements WifiP2pManager.ChannelListener, DeviceListFragment.DeviceActionListener {
+import static com.spotify.sdk.android.authentication.LoginActivity.REQUEST_CODE;
 
-    // HIIIIIIIIIIIIIIi
+
+public class WiFiDirectActivity extends Activity implements WifiP2pManager.ChannelListener, DeviceListFragment.DeviceActionListener, SpotifyPlayer.NotificationCallback, ConnectionStateCallback {
+
     public static final String TAG = "wifidirectdemo";
     private WifiP2pManager manager;
     private boolean isWifiP2pEnabled = false;
@@ -29,6 +40,12 @@ public class WiFiDirectActivity extends Activity implements WifiP2pManager.Chann
     private final IntentFilter intentFilter = new IntentFilter();
     private WifiP2pManager.Channel channel;
     private BroadcastReceiver receiver = null;
+
+    // Spotify stuff
+    private static final String CLIENT_ID = "2419f406e1f443258bca366363fcd3c5";
+    private static final String REDIRECT_URI = "onesound://callback";
+    private Button spotifyButton;
+    private SpotifyPlayer mPlayer;
 
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
@@ -69,6 +86,20 @@ public class WiFiDirectActivity extends Activity implements WifiP2pManager.Chann
                         Toast.LENGTH_SHORT).show();
             }
         });
+
+        spotifyButton = (Button) findViewById(R.id.startSpotify);
+        spotifyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
+                        AuthenticationResponse.Type.TOKEN,
+                        REDIRECT_URI);
+                builder.setScopes(new String[]{"user-read-private", "streaming"});
+                AuthenticationRequest request = builder.build();
+
+                AuthenticationClient.openLoginActivity(WiFiDirectActivity.this, REQUEST_CODE, request);
+            }
+        });
     }
 
     /** register the BroadcastReceiver with the intent values to be matched */
@@ -83,6 +114,38 @@ public class WiFiDirectActivity extends Activity implements WifiP2pManager.Chann
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Spotify.destroyPlayer(this);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        // Check if result comes from the correct activity
+        if (requestCode == REQUEST_CODE) {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
+                Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+                    @Override
+                    public void onInitialized(SpotifyPlayer spotifyPlayer) {
+                        mPlayer = spotifyPlayer;
+                        mPlayer.addConnectionStateCallback(WiFiDirectActivity.this);
+                        mPlayer.addNotificationCallback(WiFiDirectActivity.this);
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -253,5 +316,42 @@ public class WiFiDirectActivity extends Activity implements WifiP2pManager.Chann
             }
         }
 
+    }
+
+    @Override
+    public void onLoggedIn() {
+        Log.d("MainActivity", "User logged in");
+        mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
+    }
+
+    @Override
+    public void onLoggedOut() {
+
+    }
+
+    @Override
+    public void onLoginFailed(Error error) {
+
+    }
+
+    @Override
+    public void onTemporaryError() {
+
+    }
+
+    @Override
+    public void onConnectionMessage(String s) {
+
+    }
+
+    @Override
+    public void onPlaybackEvent(PlayerEvent playerEvent) {
+
+    }
+
+    @Override
+    public void onPlaybackError(Error error) {
+        Toast.makeText(WiFiDirectActivity.this, "Error: " + error.name(),
+                Toast.LENGTH_SHORT).show();
     }
 }
