@@ -7,9 +7,10 @@
     android:padding="5dp">
     <Button
         android:id="@+id/startSpotify"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Spotify"/>
+        android:text="Start Spotify"
+        android:background="@android:color/holo_green_light"/>
 
     <LinearLayout
         android:layout_width="match_parent"
