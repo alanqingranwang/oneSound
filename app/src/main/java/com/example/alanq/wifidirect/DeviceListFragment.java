@@ -23,6 +23,7 @@ import java.util.List;
 
 public class DeviceListFragment extends ListFragment implements WifiP2pManager.PeerListListener {
 
+        //coment test
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     ProgressDialog progressDialog = null;
     View mContentView = null;
